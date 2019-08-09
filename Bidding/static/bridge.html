@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<!-- © Chris Seddon, 28 July 2019 -->
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name='viewport' 
+     content='width=device-width, height=device-height, user-scalable=no,
+              initial-scale=1.0, maximum-scale=1.0, user-scalable=0' />
+<link rel="stylesheet" href="jquery-ui-1.12.1.css">
+<script type="text/javascript" src="jquery-3.2.1.js"></script>
+<script type="text/javascript" src="jquery-ui-1.12.1.js"></script>
+<script type="text/javascript" src="d3/d3.min.js"></script>
+
+<script>
+
+var suits = ['\u2660', `<span style="color: red">\u2665</span>`, `<span style="color: red">\u2666</span>`, '\u2663'];
+var selectors = ["#north", "#east", "#south", "#west"];
+var blankHtml = `'\u2660'<br/><span style="color: red">\u2665</span><br/><span style="color: red">\u2666</span><br/>'\u2663'`; 
+function getAjaxData(url, fn) {
+    let a = $.ajax(
+    {
+        url: url,
+        type: 'GET',
+        contentType:'application/json',
+        dataType:'json'
+    });
+    return a;
+}
+
+function getHandsAsJSON(url) {
+    let a1 = getAjaxData(`/${url}`);
+    $.when(a1).done(function(data) {
+        populateHands(data);
+    });
+}
+function setupBridgeTable(dealer, vulnerable) {
+    function centerOfBridgeTable() {
+		var NS_color;
+		var EW_color;
+		if(vulnerable === 'All') {
+        	NS_color = 'red';
+        	EW_color = 'red';				
+		}
+		if(vulnerable === 'None') {
+        	NS_color = 'green';
+        	EW_color = 'green';
+		}
+		if(vulnerable === 'NS') {
+        	NS_color = 'red';
+        	EW_color = 'green';				
+		}
+		if(vulnerable === 'EW') {
+        	NS_color = 'green';
+        	EW_color = 'red';								
+		}
+		let center = `<div id="table-outside">
+	    <div id="N">NORTH</div>
+	    <div id="S">SOUTH</div>
+	    <div id="E">EAST</div>
+	    <div id="W">WEST</div></div>`;
+		$(center).appendTo('#bridge-table'); 
+		$('#table-outside').css({
+			'width': '100%',
+			'height': '100%',
+			'display': 'flex',
+			'justify-content': 'center',
+			'align-items': 'center',
+			'background': `linear-gradient(45deg, ${EW_color} 50%, transparent 50%) 0% 0% / 50% 50%,
+	                linear-gradient(-45deg, transparent 50%, ${EW_color} 50%) 0% 100% / 50% 50%,
+	                linear-gradient(135deg, transparent 50%, ${EW_color} 50%) 100% 0% / 50% 50%,
+	                linear-gradient(-135deg, ${EW_color} 50%, transparent 50%) 100% 100% / 50% 50%,
+	                ${NS_color}`,
+			'background-repeat': 'no-repeat'
+		});
+		$('#N').css({'position': 'absolute',
+		             'align-self': 'flex-start',
+					 'padding': '1%'
+		});
+		$('#S').css({'position': 'absolute',
+                     'align-self': 'flex-end',
+		             'padding': '1%',
+        });
+		$('#E').css({'writing-mode': 'vertical-rl',
+		             'text-orientation': 'upright',
+				     'position': 'relative',
+		             'left': '-35%'
+		});
+		$('#W').css({'writing-mode': 'vertical-rl',
+        			 'text-orientation': 'upright',
+	     			 'position': 'relative',
+       				 'right': '-35%'
+		});
+		$(`#${dealer}`).css({'color':'white'});
+    }
+
+    let north = `<div class="grid-item", id='north'></div>`;
+    let east  = `<div class="grid-item", id='east'></div>`;
+    let south = `<div class="grid-item", id='south'></div>`;
+    let west  = `<div class="grid-item", id='west'></div>`;
+    let spacer = `<div class="spacer"></div>`;
+
+    $('#bridge-table').remove();
+    let bridgeTable = `<div id="bridge-table" class="grid-container">`;
+    $('#frame').append(bridgeTable);
+    $(spacer).clone().appendTo('#bridge-table').attr('id', 'spacer-1');
+    $('#bridge-table').append(north);
+    $(spacer).clone().appendTo('#bridge-table');
+    
+    $('#bridge-table').append(east);
+    centerOfBridgeTable(dealer, vulnerable);
+    $('#bridge-table').append(west);
+    
+    $(spacer).clone().appendTo('#bridge-table');
+    $('#bridge-table').append(south);
+    $(spacer).clone().appendTo('#bridge-table');
+    
+    function toggleHand(selector, player) {
+        $(selector).click(function() {
+        	if($(this).html() === hands[player]) {
+            	$(this).html(`<br>${suits.join("<br>")}`);    		
+        	} else {
+            	$(this).html(hands[player]);    		    		
+        	}
+    	});    	
+    }
+ 	toggleHand('#north', 0);
+ 	toggleHand('#east',  1);
+ 	toggleHand('#south', 2);
+ 	toggleHand('#west',  3);
+    
+}
+
+var hands = [];
+
+function populateHands(data) {
+	let board = data['board'];
+	let dealer = data['dealer'];
+	let vulnerable = data['vulnerable'];
+	let scoreTable = data['scoreTable'];
+	let deal = data['deal'];
+	let record = data['record'];
+    setupBridgeTable(dealer, vulnerable);
+	setupScoreTable(scoreTable);
+	
+    let selectors = ['#north', '#east', '#south', '#west'];
+    let controls = ['#control-N', '#control-E', '#control-S', '#control-W'];
+    // save copy of hands for toggling
+    hands = [];
+    for(let player = 0; player < 4; player++) {
+        let cards = "<br>";
+        let hand = deal[player];
+        let selector = selectors[player];
+        for (let suit = 0; suit < 4; suit++) {
+            cards += `${suits[suit]}&nbsp;`;
+            cards += hand[suit].join(' ');
+            cards += "<br>";
+        }
+        cards = cards.replace(/T/g, "10");
+        hands[player] = cards;	// copy for toggling
+        $(selector).html(cards);
+        $(selector).css({'text-align':'left'});
+    }
+	setupInfoBlock(record);
+	
+	// show or hide hands according to settings on checkboxes
+	$.each(controls, function(i, control) {
+		if($(control).prop('checked')) {
+			hideHand(selectors[i]);
+		} else {
+			showHand(selectors[i]);
+		}
+	});
+	// show or hide travellers according to settings on checkbox
+	if($('#control-T').prop('checked')) {
+		$('#scoreTable tbody').hide();
+	} else {					
+		$('#scoreTable tbody').show();
+	}
+}
+
+function hideHand(selector) {
+	$(selector).html(`<br>${suits.join("<br>")}`);    		
+}
+
+function showHand(selector) {
+	let player = selectors.indexOf(selector);
+	$(selector).html(hands[player]);
+}
+
+function setupQueryBlock() {
+    $('#query').remove();
+    $('#submit-query').remove();
+    let query = `<textarea rows="4" cols="50" id="query">`;
+    $('#frame').append(query);
+    $('#query').css({'height':'10vh',
+    	             'width':'60vh',
+    	             'background-color':'antiquewhite',
+    	             'border-color': '#21F396',
+    	             'border-width':'1vh',
+    	             'border-style': 'ridge',
+    	             'position':'absolute',
+    	             'bottom':'1vh'});	
+	let submit = `<button type="button" id="submit-query">Submit</button>`;
+    $('#frame').append(submit);	
+    $('#submit-query').css({
+    	'left': '70vh',
+    	'height':'5vh',
+        'width':'13.5vh',
+        'background-color':'seagreen',
+        'color': 'white',
+        'border-color': '#21F396',
+        'border-width':'1vh',
+        'border-style': 'ridge',
+        'position':'absolute',
+        'bottom':'13vh'});	
+ 	$('#submit-query').click(function() {
+		let query = $('#query').val();
+	    let a1 = getAjaxData(`/query?${query}`);
+	    a1.then(function(data) {
+	        populateHands(data);
+	    }, function(e) {
+	    	$('#info').text(`${e.responseText}`);
+	    });
+	});
+}
+
+function setupButtons() {
+	$('#populate').click(function() {
+		getHandsAsJSON('hands');
+	});
+	$('#refresh').click(function() {
+		getHandsAsJSON('resend');
+	});
+}
+
+function setupScoreTable(scoreTable) {
+    let table = `
+    	<table id="scoreTable" border="0">
+    	<thead>
+        <tr><th>Bid</th><th>By</th><th>Trk</th><th>NS</th><th>EW</th></tr>
+        </thead>
+        <tbody></tbody>
+    	</table>`;
+    $('#scoreTable').remove();
+    $('#frame').append(table);
+    var tr = d3.select("#scoreTable tbody")
+	    .selectAll("tr")
+    	.data(scoreTable)
+    	.enter().append("tr");
+    var td = tr.selectAll("td")
+    	.data(function(d, i) { return Object.values(d); })
+    	.enter()
+    	.append("td").html(function(d, i) { 
+    		if(i === 0) {
+    			d = d.replace('S', suits[0]);
+    			d = d.replace('H', suits[1]);
+    			d = d.replace('D', suits[2]);
+    			d = d.replace('C', suits[3]);
+    		}
+    		return d; 
+    	});
+	
+    $("#scoreTable").css({'margin-left': '2vh',
+    	                  'float':'right',
+    	                  'background-color':'rgba(176, 245, 214, 1.0)'});
+	$('#scoreTable tbody').hide()
+    
+    $('#scoreTable').click(function() {
+    	if($('#scoreTable tbody').is(":hidden"))
+    		$('#scoreTable tbody').show()
+    	else
+	    	$('#scoreTable tbody').hide();
+    });
+}
+
+function setupInfoBlock(record) {
+	$('#info').remove();
+	let info = `<div id="info"></div>`;
+	$('#frame').append(info);
+	$('#info').html(`${record}`);
+}
+
+function setupControls() {
+	//	$('#controls').remove();
+	let controler = `<div id="controller"></div>`;
+	let N_Hand = `<input type="checkbox" id="control-N" name="N" value="N_hide">N`;
+	let E_Hand = `<input type="checkbox" id="control-E" name="E" value="E_hide">E`;
+	let S_Hand = `<input type="checkbox" id="control-S" name="S" value="S_hide">S`;
+	let W_Hand = `<input type="checkbox" id="control-W" name="W" value="W_hide">W`;
+	let Travellers = `<input type="checkbox" id="control-T" name="T" value="T_hide">T`;
+	$('#frame').append(controler);
+	$('#controller').append(N_Hand);
+	$('#controller').append(E_Hand);
+	$('#controller').append(S_Hand);
+	$('#controller').append(W_Hand);
+	$('#controller').append(Travellers);
+	$('#controller').css({"position":"absolute",
+                          "bottom"  :"5vh",
+                          "right"    :"25vw"});
+	$('#controller').on('change', function(event) {
+		let target = event.target;
+		if(target.id === "control-T") {
+			if(target.checked)
+		    	$('#scoreTable tbody').hide();
+	    	else					
+	    		$('#scoreTable tbody').show();
+		} else {
+	    	let position = target.id.slice(-1);
+	    	let player = "NESW".indexOf(position);
+	    	let selector = selectors[player];
+			if(target.checked)
+				hideHand(selector);
+			else
+				showHand(selector);
+		}
+	});
+ }
+
+$(document).ready(function() {
+    getHandsAsJSON('hands');
+    setupButtons();
+	setupQueryBlock();
+	setupControls();
+});
+
+</script>
+<style type="text/css">
+
+    body {
+        margin-left: 2vw;
+        margin-top: 0;
+        margin-bottom: 0;
+        overscroll-behavior: none;
+        font-size: larger;
+    }
+    div.ui-page.ui-page-theme-a.ui-page-active {
+        padding-left: 2vw;
+        background-color: aquamarine;
+    }    
+    h1 {
+        font-size: 14pt;
+    }
+    table {
+    }
+    td, th {
+    	border-top-style: ridge;
+	    border-left-style: ridge;
+    	background-color: rgba(176, 245, 214, 1.0);	
+        text-align: center;
+    }
+    .grid-container {
+        display: grid;
+        background-color: rgba(255, 255, 255);
+        grid-template-rows: 33% 33% 34%;
+        grid-template-columns: 33% 33% 34%;
+        background-color: #21F396;
+        padding: 0px;
+        width: 70vh;
+        height: 70vh;
+        border-width: 5px;
+        border-style: ridge;
+    }
+    #frame {
+        display: inline-flex;
+    }
+    #info {
+    	position: absolute;
+    	bottom: 2vh;
+    	right: 40vh;
+    }
+    #query {
+        font-size: large;
+    }
+    .grid-item {
+        background-color: rgba(176, 245, 214, 0.5);
+        border: 1px solid rgba(0, 0, 0, 0.8);
+        padding: 20px;
+        text-align: center;
+    }
+    .spacer {
+        background-color: rgba(255, 255, 255, 0.9);
+        border: 1px solid rgba(0, 0, 0, 0.8);
+        padding: 20px;
+        text-align: center;
+    }
+    .my-buttons {
+    	position: absolute;
+        background-color: seagreen;
+        color: white;
+        border-color: #21F396;
+        border-width: 1vh;
+        border-style: ridge;
+        top: 5vh;
+    	margin-right: 1vw;
+    }
+    #populate {
+        left: 3vw;
+    }
+    #refresh {
+        left: 10vw;
+    }
+    
+</style>
+</head>
+<body>    
+    <div id="frame"></div>
+    <button type="button" class="my-buttons" id="populate">New Hand</button>
+    <button type="button" class="my-buttons" id="refresh">Refresh</button>
+</body>
+
+</html>

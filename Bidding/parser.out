@@ -1,0 +1,236 @@
+Created by PLY version 3.9 (http://www.dabeaz.com/ply)
+
+Grammar
+
+Rule 0     S' -> queries
+Rule 1     queries -> queries query
+Rule 2     queries -> query
+Rule 3     query -> point_range
+Rule 4     query -> distribution
+Rule 5     distribution -> player EQUAL DISTRIBUTION ;
+Rule 6     point_range -> player EQUAL range ;
+Rule 7     range -> NUMBER MINUS NUMBER
+Rule 8     player -> N
+Rule 9     player -> E
+Rule 10    player -> S
+Rule 11    player -> W
+
+Terminals, with rules where they appear
+
+;                    : 5 6
+DISTRIBUTION         : 5
+E                    : 9
+EQUAL                : 5 6
+MINUS                : 7
+N                    : 8
+NUMBER               : 7 7
+S                    : 10
+W                    : 11
+error                : 
+
+Nonterminals, with rules where they appear
+
+distribution         : 4
+player               : 5 6
+point_range          : 3
+queries              : 1 0
+query                : 1 2
+range                : 6
+
+Parsing method: LALR
+
+state 0
+
+    (0) S' -> . queries
+    (1) queries -> . queries query
+    (2) queries -> . query
+    (3) query -> . point_range
+    (4) query -> . distribution
+    (6) point_range -> . player EQUAL range ;
+    (5) distribution -> . player EQUAL DISTRIBUTION ;
+    (8) player -> . N
+    (9) player -> . E
+    (10) player -> . S
+    (11) player -> . W
+
+    N               shift and go to state 6
+    E               shift and go to state 7
+    S               shift and go to state 8
+    W               shift and go to state 9
+
+    queries                        shift and go to state 1
+    query                          shift and go to state 2
+    point_range                    shift and go to state 3
+    distribution                   shift and go to state 4
+    player                         shift and go to state 5
+
+state 1
+
+    (0) S' -> queries .
+    (1) queries -> queries . query
+    (3) query -> . point_range
+    (4) query -> . distribution
+    (6) point_range -> . player EQUAL range ;
+    (5) distribution -> . player EQUAL DISTRIBUTION ;
+    (8) player -> . N
+    (9) player -> . E
+    (10) player -> . S
+    (11) player -> . W
+
+    N               shift and go to state 6
+    E               shift and go to state 7
+    S               shift and go to state 8
+    W               shift and go to state 9
+
+    query                          shift and go to state 10
+    point_range                    shift and go to state 3
+    distribution                   shift and go to state 4
+    player                         shift and go to state 5
+
+state 2
+
+    (2) queries -> query .
+
+    N               reduce using rule 2 (queries -> query .)
+    E               reduce using rule 2 (queries -> query .)
+    S               reduce using rule 2 (queries -> query .)
+    W               reduce using rule 2 (queries -> query .)
+    $end            reduce using rule 2 (queries -> query .)
+
+
+state 3
+
+    (3) query -> point_range .
+
+    N               reduce using rule 3 (query -> point_range .)
+    E               reduce using rule 3 (query -> point_range .)
+    S               reduce using rule 3 (query -> point_range .)
+    W               reduce using rule 3 (query -> point_range .)
+    $end            reduce using rule 3 (query -> point_range .)
+
+
+state 4
+
+    (4) query -> distribution .
+
+    N               reduce using rule 4 (query -> distribution .)
+    E               reduce using rule 4 (query -> distribution .)
+    S               reduce using rule 4 (query -> distribution .)
+    W               reduce using rule 4 (query -> distribution .)
+    $end            reduce using rule 4 (query -> distribution .)
+
+
+state 5
+
+    (6) point_range -> player . EQUAL range ;
+    (5) distribution -> player . EQUAL DISTRIBUTION ;
+
+    EQUAL           shift and go to state 11
+
+
+state 6
+
+    (8) player -> N .
+
+    EQUAL           reduce using rule 8 (player -> N .)
+
+
+state 7
+
+    (9) player -> E .
+
+    EQUAL           reduce using rule 9 (player -> E .)
+
+
+state 8
+
+    (10) player -> S .
+
+    EQUAL           reduce using rule 10 (player -> S .)
+
+
+state 9
+
+    (11) player -> W .
+
+    EQUAL           reduce using rule 11 (player -> W .)
+
+
+state 10
+
+    (1) queries -> queries query .
+
+    N               reduce using rule 1 (queries -> queries query .)
+    E               reduce using rule 1 (queries -> queries query .)
+    S               reduce using rule 1 (queries -> queries query .)
+    W               reduce using rule 1 (queries -> queries query .)
+    $end            reduce using rule 1 (queries -> queries query .)
+
+
+state 11
+
+    (6) point_range -> player EQUAL . range ;
+    (5) distribution -> player EQUAL . DISTRIBUTION ;
+    (7) range -> . NUMBER MINUS NUMBER
+
+    DISTRIBUTION    shift and go to state 13
+    NUMBER          shift and go to state 14
+
+    range                          shift and go to state 12
+
+state 12
+
+    (6) point_range -> player EQUAL range . ;
+
+    ;               shift and go to state 15
+
+
+state 13
+
+    (5) distribution -> player EQUAL DISTRIBUTION . ;
+
+    ;               shift and go to state 16
+
+
+state 14
+
+    (7) range -> NUMBER . MINUS NUMBER
+
+    MINUS           shift and go to state 17
+
+
+state 15
+
+    (6) point_range -> player EQUAL range ; .
+
+    N               reduce using rule 6 (point_range -> player EQUAL range ; .)
+    E               reduce using rule 6 (point_range -> player EQUAL range ; .)
+    S               reduce using rule 6 (point_range -> player EQUAL range ; .)
+    W               reduce using rule 6 (point_range -> player EQUAL range ; .)
+    $end            reduce using rule 6 (point_range -> player EQUAL range ; .)
+
+
+state 16
+
+    (5) distribution -> player EQUAL DISTRIBUTION ; .
+
+    N               reduce using rule 5 (distribution -> player EQUAL DISTRIBUTION ; .)
+    E               reduce using rule 5 (distribution -> player EQUAL DISTRIBUTION ; .)
+    S               reduce using rule 5 (distribution -> player EQUAL DISTRIBUTION ; .)
+    W               reduce using rule 5 (distribution -> player EQUAL DISTRIBUTION ; .)
+    $end            reduce using rule 5 (distribution -> player EQUAL DISTRIBUTION ; .)
+
+
+state 17
+
+    (7) range -> NUMBER MINUS . NUMBER
+
+    NUMBER          shift and go to state 18
+
+
+state 18
+
+    (7) range -> NUMBER MINUS NUMBER .
+
+    ;               reduce using rule 7 (range -> NUMBER MINUS NUMBER .)
+

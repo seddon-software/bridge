@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+.triangle-up {
+	width: 100%;
+	height: 100%;
+	display: flex;
+
+	justify-content: center;
+	align-items: center;
+
+	/*       image position / size        */
+    background: linear-gradient(45deg, green 50%, transparent 50%) 0% 0% / 50% 50%,
+                linear-gradient(-45deg, transparent 50%, green 50%) 0% 100% / 50% 50%,
+                linear-gradient(135deg, transparent 50%, green 50%) 100% 0% / 50% 50%,
+                linear-gradient(-135deg, green 50%, transparent 50%) 100% 100% / 50% 50%,
+				red;
+                      ;
+    background-repeat: no-repeat;
+}
+#frame {
+	height: 250px;
+    width: 250px;
+    border: 1px;
+    border-style: dashed;
+}
+#N {
+	position: absolute;
+	align-self: flex-start;
+	padding: 1%;
+}
+#S {
+	position: absolute;
+	align-self: flex-end;
+	padding: 1%;
+}
+#E {
+	writing-mode: vertical-rl;
+	text-orientation: upright;
+	position: relative;
+	left: -45%;
+}
+#W {
+	writing-mode: vertical-rl;
+	text-orientation: upright;
+	position: relative;
+	right: -45%;
+}
+</style>
+</head>
+<body>
+
+<h2>Table</h2>
+<div id="frame">
+<div class="triangle-up">
+    <div id="N">NORTH</div>
+    <div id="S">SOUTH</div>
+    <div id="E">EAST</div>
+    <div id="W">WEST</div>
+</div>
+</div>
+</body>
+</html> 

@@ -1,0 +1,8 @@
+**/results
+**/*.zip
+**/*.o
+**/__pycache__
+**/.DS_Store
+RemoteSystemsTempFiles
+.metadata
+
