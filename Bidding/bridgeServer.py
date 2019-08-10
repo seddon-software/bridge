@@ -22,26 +22,13 @@ def queryDataframe(queries):
     df = df[['BOARD', 'DEALER', 'VULNERABLE', 'SCORE_TABLE', 'DEAL']]
     data = df.values.tolist()
 
-@app.route("/")
-def root():
-    return app.send_static_file('bridge.html')
-
-df = pd.read_msgpack('bridge_results.msg')
-df = df[['BOARD', 'DEALER', 'VULNERABLE', 'SCORE_TABLE', 'DEAL']]
-data = df.values.tolist()
-currentHand = data.pop()
-data = []
 
 def dealer(df, by):
-    values = df.apply(lambda row: row['DEALER'] == by, axis=1).values
-    df = df.assign(NEW_DEALER=values)
-    df = df[df['NEW_DEALER']==True]
+    df = df[df['DEALER'] == by]
     return df
         
 def vulnerable(df, by):
-    values = df.apply(lambda row: row['VULNERABLE'] == by, axis=1).values
-    df = df.assign(NEW_VULNERABLE=values)
-    df = df[df['NEW_VULNERABLE']==True]
+    df = df[df['VULNERABLE'] == by]
     return df
         
 def weakTwo(df, by):
@@ -51,7 +38,7 @@ def weakTwo(df, by):
                 row[f'{by}_PTS'] >= 5 and row[f'{by}_PTS'] <= 9)
     values = df.apply(select, axis=1).values
     df = df.assign(WEAK_TWO=values)
-    df = df[df['WEAK_TWO']==True]
+    df = df[df['WEAK_TWO']]
     return df
 
 def exact_distribution(df, by, d):
@@ -63,7 +50,7 @@ def exact_distribution(df, by, d):
 
     values = df.apply(select, axis=1).values
     df = df.assign(NEW_EXACT_DISTRIBUTION=values)
-    df = df[df['NEW_EXACT_DISTRIBUTION']==True]
+    df = df[df['NEW_EXACT_DISTRIBUTION']]
     return df
     
 def unordered_distribution(df, by, d):
@@ -80,9 +67,8 @@ def unordered_distribution(df, by, d):
 
     values = df.apply(select, axis=1).values
     df = df.assign(NEW_UNORDERED_DISTRIBUTION=values)
-    df = df[df['NEW_UNORDERED_DISTRIBUTION']==True]
+    df = df[df['NEW_UNORDERED_DISTRIBUTION']]
     return df
-    
     
 def send(item):
     message = jsonify({
@@ -96,6 +82,16 @@ def send(item):
     print(message)
     return message
     
+@app.route("/")
+def root():
+    return app.send_static_file('bridge.html')
+
+df = pd.read_msgpack('bridge_results.msg')
+df = df[['BOARD', 'DEALER', 'VULNERABLE', 'SCORE_TABLE', 'DEAL']]
+data = df.values.tolist()
+currentHand = data.pop()
+data = []
+
 @app.route('/resend')
 def resendHands():
     global currentHand
