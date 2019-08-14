@@ -22,7 +22,6 @@ def queryDataframe(queries):
     df = df[['BOARD', 'DEALER', 'VULNERABLE', 'SCORE_TABLE', 'DEAL']]
     data = df.values.tolist()
 
-
 def dealer(df, by):
     df = df[df['DEALER'] == by]
     return df
@@ -30,7 +29,35 @@ def dealer(df, by):
 def vulnerable(df, by):
     df = df[df['VULNERABLE'] == by]
     return df
-        
+
+def oneNoTrump(df, by):
+    def select(row):
+        d = sorted(row[f'{by}_DISTRIBUTION'])
+        return (d[0] >= 2 and
+                d[3] <= 5 and
+                d[2] + d[3] <= 9 and
+                row[f'{by}_PTS'] >= 12 and 
+                row[f'{by}_PTS'] <= 14)
+    values = df.apply(select, axis=1).values
+    df.insert(0, f'ONE_NOTRUMP_{by}', values)
+    df = df[df[f'ONE_NOTRUMP_{by}']]
+    return df
+                
+
+def oneClub(df, by):
+    def select(row):
+        return (row[f'{by}_DISTRIBUTION'][3]>=4 and
+                row[f'{by}_DISTRIBUTION'][0]<=4 and
+                row[f'{by}_DISTRIBUTION'][1]<=4 and
+                row[f'{by}_DISTRIBUTION'][2]<=4 and
+                row[f'{by}_PTS'] >= 11 and 
+                row[f'{by}_PTS'] <= 19)
+    values = df.apply(select, axis=1).values
+    print(df[f'{by}_DISTRIBUTION'])
+    df.insert(0, f'ONE_CLUB_{by}', values)
+    df = df[df[f'ONE_CLUB_{by}']]
+    return df
+                
 def weakTwo(df, by):
     def select(row):
         return (row[f'{by}_DISTRIBUTION'][0]==6 or 
@@ -126,7 +153,7 @@ def get_query():
     return getHands()
     
 if __name__ == "__main__":
-    print("serving on localhost, port 5000")
+    print("serving on 192.168.0.89, port 7003")
     app.debug = True
     app.run(host='192.168.0.89',port=7003)
 

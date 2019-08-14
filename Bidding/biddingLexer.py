@@ -4,6 +4,8 @@ import ply.lex as lex
 def theLexer():
     tokens = (
         'BY',
+        'ONE_NO_TRUMP',
+        'ONE_CLUB',
         'WEAK_TWO',
         'EQUAL',
         'NUMBER',
@@ -29,8 +31,16 @@ def theLexer():
         'BY'
         return t
     
+    def t_ONE_NO_TRUMP(t):
+        '1NT'
+        return t
+    
+    def t_ONE_CLUB(t):
+        '1C'
+        return t
+    
     def t_WEAK_TWO(t):
-        'WEAK_TWO'
+        'W2'
         return t
     
     def t_DISTRIBUTION(t):

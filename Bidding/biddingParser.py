@@ -27,7 +27,9 @@ def theParser(lexer, tokens):
                  | unordered_distribution 
                  | dealer
                  | vulnerable
-                 | weak_two'''
+                 | weak_two
+                 | one_no_trump
+                 | one_club'''
         p[0] = p[1]
     
 #    weakTwo(df, "W")
@@ -38,6 +40,14 @@ def theParser(lexer, tokens):
     def p_exact_distribution(p):
         '''exact_distribution : player EQUAL DISTRIBUTION ';' '''
         p[0] = f"exact_distribution(df, '{p[1]}', '{p[3]}')"
+    
+    def p_one_no_trump(p):
+        '''one_no_trump : ONE_NO_TRUMP BY player ';' '''
+        p[0] = f"oneNoTrump(df, '{p[3]}')"
+        
+    def p_one_club(p):
+        '''one_club : ONE_CLUB BY player ';' '''
+        p[0] = f"oneClub(df, '{p[3]}')"
         
     def p_weak_two(p):
         '''weak_two : WEAK_TWO BY player ';' '''

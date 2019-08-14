@@ -13,6 +13,15 @@
 
 <script>
 
+var queryExamples = `<em>Query Examples</em><br>
+    S = 10-15;<br>
+    1C BY W;<br>
+    1NT BY N;	   # 12-14<br>
+    W2 BY N;	   # 5-9, weak two by N<br>
+    W = (5323);    # 5 spades, 3 hearts, 2 diamonds and 3 clubs<br>
+    W = (53xx);    # 5 spades and 3 hearts<br>
+    E ~ (52xx);    # 5-2 in any suits<br>
+    <br>`;
 var suits = ['\u2660', `<span style="color: red">\u2665</span>`, `<span style="color: red">\u2666</span>`, '\u2663'];
 var selectors = ["#north", "#east", "#south", "#west"];
 var blankHtml = `'\u2660'<br/><span style="color: red">\u2665</span><br/><span style="color: red">\u2666</span><br/>'\u2663'`; 
@@ -289,14 +298,16 @@ function setupControls() {
 	let W_Hand = `<input type="checkbox" id="control-W" name="W" value="W_hide">W`;
 	let Travellers = `<input type="checkbox" id="control-T" name="T" value="T_hide">T`;
 	$('#frame').append(controler);
+	$('#controller').html(queryExamples);
 	$('#controller').append(N_Hand);
 	$('#controller').append(E_Hand);
 	$('#controller').append(S_Hand);
 	$('#controller').append(W_Hand);
 	$('#controller').append(Travellers);
-	$('#controller').css({"position":"absolute",
-                          "bottom"  :"5vh",
-                          "right"    :"25vw"});
+	$('#controller').css({"position" :"absolute",
+                          "bottom"   :"5vh",
+                          "right"    :"15vw",
+                          "font-size":"small"});
 	$('#controller').on('change', function(event) {
 		let target = event.target;
 		if(target.id === "control-T") {
